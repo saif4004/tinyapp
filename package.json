@@ -16,5 +16,8 @@
   "bugs": {
     "url": "https://github.com/saif4004/tinyapp/issues"
   },
-  "homepage": "https://github.com/saif4004/tinyapp#readme"
+  "homepage": "https://github.com/saif4004/tinyapp#readme",
+  "dependencies": {
+    "express": "^4.21.0"
+  }
 }
