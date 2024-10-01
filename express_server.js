@@ -78,5 +78,10 @@ app.post("/urls/:id/edit", (req,res) => {
   res.redirect('/urls');
 });
 
+app.post("/login", (req,res) =>{
+  res.cookie("username",req.body);
+  res.redirect('/urls');
+});
+
 
 
