@@ -34,8 +34,7 @@ app.get("/urls.json", (req, res) => {
 });
 
 app.get("/hello", (req, res) => {
-  const templateVars = { greeting: "Hello World!" };
-  res.render("hello_world", templateVars);
+  res.send("<html><body>Hello <b>World</b></body></html>\n");
 });
 
 app.get("/urls",(req,res) => {
@@ -58,11 +57,13 @@ app.get("/u/:id", (req, res) => {
   res.redirect(longURL);
 });
 
-
-
 app.post("/urls", (req, res) => {
   const longURL = req.body.longURL;
   const id = generateRandomString();
   urlDatabase[id] = longURL;
   res.redirect(`urls/${id}`);
 });
+
+
+
+
