@@ -25,7 +25,7 @@ const urlDatabase = {
 };
 
 app.get("/", (req, res) => {
-  res.send("Hello!");
+  res.redirect("/urls");
 });
 
 app.listen(PORT, () => {
@@ -92,6 +92,12 @@ app.post("/login", (req,res) =>{
   loginVal = true;
   res.redirect('/urls');
 });
+app.post("/logout", (req,res) =>{
+  res.clearCookie('username');
+  loginVal = false;
+  res.redirect('/urls');
+});
+
 
 
 
