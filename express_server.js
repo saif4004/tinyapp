@@ -98,6 +98,13 @@ app.post("/logout", (req,res) =>{
   res.redirect('/urls');
 });
 
+app.get("/register", (req,res) => {
+  const email = req.body.email;
+  const password = req.body.password;
+  const templateVars = {email:email, password:password};
+  res.render("register",templateVars);
+});
+
 
 
 
