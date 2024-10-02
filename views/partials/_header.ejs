@@ -22,13 +22,9 @@
             <button type="submit">Logout</button>
             </form>
           <% } else { %>
-            <form method="POST" action="/login">
-              <label>Email</label>
-              <input name="email" value="">
-              <label>password</label>
-              <input name="password" value="">
-              <button type="submit">Login</button>
-            </form>
+            <a href="../login">Log in</a>
+            <a href="../register">Register</a>
+              
           <% } %>
         </form>
       </div>
