@@ -22,10 +22,10 @@ const getUserByEmail = (email) =>  {
   for (const userId in users) {
     const user = users[userId];
     if (user.email === email) {
-      return true;
+      return user;
     }
   }
-  return false;
+  return null;
 
 };
 
@@ -155,10 +155,8 @@ app.post("/register",(req,res) =>{
   if (!email || !password) {
     return res.status(400).send('you must provide an email and a password')
   }
-  let foundUser = null;
-  if(getUserByEmail(email)) {
-    foundUser = user;
-  }
+  let foundUser = getUserByEmail(email);
+
   if (foundUser) {
     return res.status(400).send('email already exists');
   }
@@ -173,6 +171,11 @@ app.post("/register",(req,res) =>{
 
   res.cookie('userId', id);
   res.redirect('/urls');
+});
+
+app.get('/login', (req,res) => {
+  res.render('login');
+
 });
 
 
