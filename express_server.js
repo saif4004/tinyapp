@@ -18,6 +18,17 @@ const generateRandomString = function () {
   return randomStr;
 };
 
+const getUserByEmail = (email) =>  {
+  for (const userId in users) {
+    const user = users[userId];
+    if (user.email === email) {
+      return true;
+    }
+  }
+  return false;
+
+};
+
 const urlDatabase = {
   b2xVn2: "http://www.lighthouselabs.ca",
   "9sm5xK": "http://www.google.com",
@@ -134,15 +145,23 @@ app.post("/logout", (req,res) =>{
 });
 
 app.get("/register", (req,res) => {
-  const userId = req.cookies["userId"];
-  const user = users[userId];
-  const templateVars = {user: user};
-  res.render("register",templateVars);
+  res.render('register');
 });
 
 app.post("/register",(req,res) =>{
   const email = req.body.email;
   const password = req.body.password;
+  const user = req.body;
+  if (!email || !password) {
+    return res.status(400).send('you must provide an email and a password')
+  }
+  let foundUser = null;
+  if(getUserByEmail(email)) {
+    foundUser = user;
+  }
+  if (foundUser) {
+    return res.status(400).send('email already exists');
+  }
   const id = generateRandomString();
   const newUser = {
     id: id,
@@ -150,6 +169,8 @@ app.post("/register",(req,res) =>{
     password: password
   }
   users[id] = newUser;
+  console.log(users);
+
   res.cookie('userId', id);
   res.redirect('/urls');
 });
