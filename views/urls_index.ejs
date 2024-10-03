@@ -6,7 +6,6 @@
       name="viewport"
       content="width=device-width, initial-scale=1, shrink-to-fit=no"
     />
-
     <!-- Bootstrap CSS -->
     <link
       rel="stylesheet"
@@ -32,8 +31,8 @@
         <tbody>
           <% for (let id in urls) { %>
             <tr>
-              <td><%= id %></td>
-              <td><a href= "<%  id %>"> <%= urls[id] %></a></td>
+              <td><a href="/u/<%= id %>"><%= id %></a></td>
+              <td><%= urls[id].longURL %></td>
               <td><a href="/urls/<%= id %>">Edit </a></td>
               <td><form method="POST" action="/urls/<%= id %>/delete">
                 <button type="submit">Delete</button>
