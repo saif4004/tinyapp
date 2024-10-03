@@ -72,7 +72,12 @@ app.get("/urls",(req,res) => {
 });
 
 app.get("/urls/new", (req, res) => {
-  const userId = req.cookies["userId"];
+  const userId = req.cookies.userId;
+
+  if (!userId) {
+   
+    return res.redirect("/login");
+  }
   const user = users[userId];
   const templateVars = { urls: urlDatabase,
     user: user,
@@ -90,11 +95,20 @@ app.get("/urls/:id", (req, res) => {
 
 app.get("/u/:id", (req, res) => {
   const id = req.params.id;
+  if(!id) {
+    return res.send(`${id} Does not exist`);
+  }
   const longURL = urlDatabase[id];
   res.redirect(longURL);
 });
 
 app.post("/urls", (req, res) => {
+  const userId = req.cookies.userId;
+  
+  if (!userId) {
+   
+    return res.status(401).send('you must be signed in to see this page');
+  }
   const longURL = req.body.longURL;
   const id = generateRandomString();
   urlDatabase[id] = longURL;
