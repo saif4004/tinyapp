@@ -1,5 +1,6 @@
 const express = require("express");
 const cookieParser = require('cookie-parser');
+const bcrypt = require("bcryptjs");
 const app = express();
 const PORT = 8080;
 
@@ -197,7 +198,9 @@ app.post("/login", (req,res) =>{
   if (!foundUser) {
     return res.status(403).send('the email you provided does not exist');
   }
-  if (foundUser.password !== password) {
+  const result = bcrypt.compareSync(password, foundUser.password);
+  // if (foundUser.password !== password) {
+  if (!result) {
     return res.status(403).send('the passwords dont match');
   }
   const user = req.body;
@@ -212,7 +215,6 @@ app.post("/logout", (req,res) =>{
 
 app.get("/register", (req,res) => {
   const userId = req.cookies['userId'];
-  console.log(userId);
   if(userId) {
     return res.redirect('/urls');
   }
@@ -232,12 +234,15 @@ app.post("/register",(req,res) =>{
     return res.status(400).send('email already exists');
   }
   const id = generateRandomString();
+  const salt = bcrypt.genSaltSync(10);
+  const hash = bcrypt.hashSync(password, salt);
   const newUser = {
     id: id,
     email: email,
-    password: password
+    password: hash
   }
   users[id] = newUser;
+  console.log(users);
   res.cookie('userId', id);
   res.redirect('/urls');
 });
