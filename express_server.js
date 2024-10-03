@@ -1,5 +1,5 @@
 const express = require("express");
-const cookieSession = require('cookie-session')
+const cookieSession = require('cookie-session');
 const bcrypt = require("bcryptjs");
 const getUserByEmail = require("./helpers");
 const app = express();
@@ -10,9 +10,9 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cookieSession({
   name: 'session',
   keys: ['secret'],
-}))
+}));
 
-const generateRandomString = function () {
+const generateRandomString = function() {
   const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
   let randomStr = '';
 
@@ -27,12 +27,12 @@ const generateRandomString = function () {
 const ulrsForUser = (id) => {
   const userUrls = {};
   for (const ulrId in urlDatabase) {
-    if(urlDatabase[ulrId].ulrId === id) {
+    if (urlDatabase[ulrId].ulrId === id) {
       userUrls[ulrId] = urlDatabase[ulrId];
     }
   }
   return userUrls;
-}
+};
 
 const urlDatabase = {
   b6UTxQ: {
@@ -85,7 +85,7 @@ app.get("/urls/new", (req, res) => {
   const user = users[userId];
   const templateVars = { urls: urlDatabase,
     user: user,
-   };
+  };
   res.render("urls_new",templateVars);
 });
 
@@ -95,10 +95,10 @@ app.get("/urls/:id", (req, res) => {
     return res.status(401).send('you must be signed in to see this page');
   }
   const url = urlDatabase[req.params.id];
-  if(!url) {
+  if (!url) {
     return res.status(403).send("The URL you trying reach does not exist");
   }
-  if(url.ulrId !== userId) {
+  if (url.ulrId !== userId) {
     return res.status(403).send("You dont have permission to view this page");
   }
   const user = users[userId];
@@ -110,7 +110,7 @@ app.get("/urls/:id", (req, res) => {
 
 app.get("/u/:id", (req, res) => {
   const id = req.params.id;
-  if(!id) {
+  if (!id) {
     return res.send(`${id} Does not exist`);
   }
   const longURL = urlDatabase[id].longURL;
@@ -170,7 +170,7 @@ app.post("/login", (req,res) =>{
   const password = req.body.password;
 
   if (!email || !password) {
-    return res.status(400).send('you must provide an email and a password')
+    return res.status(400).send('you must provide an email and a password');
   }
   let foundUser = null;
 
@@ -187,7 +187,6 @@ app.post("/login", (req,res) =>{
   if (!result) {
     return res.status(403).send('the passwords dont match');
   }
-  const user = req.body;
   req.session.userId = foundUser.id;
   res.redirect('/urls');
 
@@ -199,7 +198,7 @@ app.post("/logout", (req,res) =>{
 
 app.get("/register", (req,res) => {
   const userId = req.session['userId'];
-  if(userId) {
+  if (userId) {
     return res.redirect('/urls');
   }
   res.render('register', {userId});
@@ -208,9 +207,8 @@ app.get("/register", (req,res) => {
 app.post("/register",(req,res) =>{
   const email = req.body.email;
   const password = req.body.password;
-  const user = req.body;
   if (!email || !password) {
-    return res.status(400).send('you must provide an email and a password')
+    return res.status(400).send('you must provide an email and a password');
   }
   let foundUser = getUserByEmail(email,users);
 
@@ -224,7 +222,7 @@ app.post("/register",(req,res) =>{
     id: id,
     email: email,
     password: hash
-  }
+  };
   users[id] = newUser;
   req.session.userId = id;
   res.redirect('/urls');
