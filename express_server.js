@@ -28,26 +28,41 @@ const getUserByEmail = (email) =>  {
   return null;
 
 };
+const ulrsForUser = (id) => {
+  const userUrls = {};
+  for (const ulrId in urlDatabase) {
+    if(urlDatabase[ulrId].ulrId === id) {
+      userUrls[ulrId] = urlDatabase[ulrId];
+    }
+  }
+  return userUrls;
+}
 
 const urlDatabase = {
-  b2xVn2: "http://www.lighthouselabs.ca",
-  "9sm5xK": "http://www.google.com",
+  b6UTxQ: {
+    longURL: "https://www.tsn.ca",
+    ulrId: "aJ48lW",
+  },
+  i3BoGr: {
+    longURL: "https://www.google.ca",
+    ulrId: "aJ48lWW",
+  },
 };
 
 const users = {
-  userRandomID: {
-    id: "userRandomID",
+  aJ48lW: {
+    id: "aJ48lW",
     email: "a@a.com",
     password: "1234",
   },
-  user2RandomID: {
-    id: "user2RandomID",
+  aJ48lWW: {
+    id: "aJ48lWW",
     email: "b@b.com",
     password: "5678",
   },
 };
 app.get("/", (req, res) => {
-  res.redirect("/urls");
+  res.redirect("/login");
 });
 
 app.listen(PORT, () => {
@@ -64,10 +79,13 @@ app.get("/hello", (req, res) => {
 
 app.get("/urls",(req,res) => {
   const userId = req.cookies["userId"];
+  if (!userId) {
+   
+    return res.status(401).send('you must be signed in to see this page');
+  }
   const user = users[userId];
-  const templateVars = { urls: urlDatabase,
-   user:user,
-   };
+  const userURLS = ulrsForUser(userId);
+  const templateVars = { user: user, urls: userURLS };
   res.render("urls_index", templateVars);
 });
 
@@ -87,43 +105,77 @@ app.get("/urls/new", (req, res) => {
 
 app.get("/urls/:id", (req, res) => {
   const userId = req.cookies["userId"];
-
+  if (!userId) {
+    return res.status(401).send('you must be signed in to see this page');
+  }
+  const url = urlDatabase[req.params.id];
+  if(!url) {
+    return res.status(403).send("The URL you trying reach does not exist");
+  }
+  if(url.ulrId !== userId) {
+    return res.status(403).send("You dont have permission to view this page");
+  }
   const user = users[userId];
-  const templateVars = { id: req.params.id, longURL: urlDatabase[req.params.id], user:user };
+  const templateVars = { id: req.params.id, longURL: url.longURL, user:user };
   res.render("urls_show", templateVars);
 });
+
+
 
 app.get("/u/:id", (req, res) => {
   const id = req.params.id;
   if(!id) {
     return res.send(`${id} Does not exist`);
   }
-  const longURL = urlDatabase[id];
+  const longURL = urlDatabase[id].longURL;
   res.redirect(longURL);
 });
 
 app.post("/urls", (req, res) => {
   const userId = req.cookies.userId;
-  
   if (!userId) {
    
     return res.status(401).send('you must be signed in to see this page');
   }
   const longURL = req.body.longURL;
   const id = generateRandomString();
-  urlDatabase[id] = longURL;
+  urlDatabase[id] = {
+    longURL:longURL,
+    ulrId: userId
+  };
   res.redirect(`/urls/${id}`);
 });
 
 app.post("/urls/:id/delete", (req,res) => {
-  const id = req.params.id;
-  delete urlDatabase[id];
+  const userId = req.cookies["userId"];
+  const url = urlDatabase[req.params.id];
+  if (!userId) {
+    return res.status(401).send("You must be logged in to delete URLs.");
+  }
+  if (!url) {
+    return res.status(404).send("The URL you're trying to delete does not exist.");
+  }
+  if (url.ulrId !== userId) {
+    return res.status(403).send("You do not have permission to delete this URL.");
+  }
+  delete urlDatabase[req.params.id];
   res.redirect('/urls');
 });
 app.post("/urls/:id/edit", (req,res) => {
-  const id = req.params.id;
+  const userId = req.cookies["userId"];
+  const url = urlDatabase[req.params.id];
+  
+  if (!userId) {
+    return res.status(401).send("You must be logged in to edit URLs.");
+  }
+  if (!url) {
+    return res.status(404).send("The URL you're trying to edit does not exist");
+  }
+  if (url.ulrId !== userId) {
+    return res.status(403).send("You do not have permission to edit this URL.");
+  }
   const newURL = req.body.longURL;
-  urlDatabase[id] = newURL;
+  urlDatabase[req.params.id].longURL = newURL;
   res.redirect('/urls');
 });
 
@@ -159,7 +211,12 @@ app.post("/logout", (req,res) =>{
 });
 
 app.get("/register", (req,res) => {
-  res.render('register');
+  const userId = req.cookies['userId'];
+  console.log(userId);
+  if(userId) {
+    return res.redirect('/urls');
+  }
+  res.render('register', {userId});
 });
 
 app.post("/register",(req,res) =>{
