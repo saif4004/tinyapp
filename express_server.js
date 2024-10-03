@@ -1,12 +1,15 @@
 const express = require("express");
-const cookieParser = require('cookie-parser');
+const cookieSession = require('cookie-session')
 const bcrypt = require("bcryptjs");
 const app = express();
 const PORT = 8080;
 
 app.set("view engine", "ejs");
 app.use(express.urlencoded({ extended: true }));
-app.use(cookieParser());
+app.use(cookieSession({
+  name: 'session',
+  keys: ['secret'],
+}))
 
 const generateRandomString = function () {
   const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
@@ -51,16 +54,6 @@ const urlDatabase = {
 };
 
 const users = {
-  aJ48lW: {
-    id: "aJ48lW",
-    email: "a@a.com",
-    password: "1234",
-  },
-  aJ48lWW: {
-    id: "aJ48lWW",
-    email: "b@b.com",
-    password: "5678",
-  },
 };
 app.get("/", (req, res) => {
   res.redirect("/login");
@@ -79,7 +72,7 @@ app.get("/hello", (req, res) => {
 });
 
 app.get("/urls",(req,res) => {
-  const userId = req.cookies["userId"];
+  const userId = req.session["userId"];
   if (!userId) {
    
     return res.status(401).send('you must be signed in to see this page');
@@ -91,7 +84,7 @@ app.get("/urls",(req,res) => {
 });
 
 app.get("/urls/new", (req, res) => {
-  const userId = req.cookies.userId;
+  const userId = req.session.userId;
 
   if (!userId) {
    
@@ -105,7 +98,7 @@ app.get("/urls/new", (req, res) => {
 });
 
 app.get("/urls/:id", (req, res) => {
-  const userId = req.cookies["userId"];
+  const userId = req.session["userId"];
   if (!userId) {
     return res.status(401).send('you must be signed in to see this page');
   }
@@ -133,7 +126,7 @@ app.get("/u/:id", (req, res) => {
 });
 
 app.post("/urls", (req, res) => {
-  const userId = req.cookies.userId;
+  const userId = req.session.userId;
   if (!userId) {
    
     return res.status(401).send('you must be signed in to see this page');
@@ -148,7 +141,7 @@ app.post("/urls", (req, res) => {
 });
 
 app.post("/urls/:id/delete", (req,res) => {
-  const userId = req.cookies["userId"];
+  const userId = req.session["userId"];
   const url = urlDatabase[req.params.id];
   if (!userId) {
     return res.status(401).send("You must be logged in to delete URLs.");
@@ -163,7 +156,7 @@ app.post("/urls/:id/delete", (req,res) => {
   res.redirect('/urls');
 });
 app.post("/urls/:id/edit", (req,res) => {
-  const userId = req.cookies["userId"];
+  const userId = req.session["userId"];
   const url = urlDatabase[req.params.id];
   
   if (!userId) {
@@ -199,22 +192,21 @@ app.post("/login", (req,res) =>{
     return res.status(403).send('the email you provided does not exist');
   }
   const result = bcrypt.compareSync(password, foundUser.password);
-  // if (foundUser.password !== password) {
   if (!result) {
     return res.status(403).send('the passwords dont match');
   }
   const user = req.body;
-  res.cookie('userId', foundUser.id);
+  req.session.userId = foundUser.id;
   res.redirect('/urls');
 
 });
 app.post("/logout", (req,res) =>{
-  res.clearCookie('userId');
+  req.session = null;
   res.redirect('/login');
 });
 
 app.get("/register", (req,res) => {
-  const userId = req.cookies['userId'];
+  const userId = req.session['userId'];
   if(userId) {
     return res.redirect('/urls');
   }
@@ -242,8 +234,7 @@ app.post("/register",(req,res) =>{
     password: hash
   }
   users[id] = newUser;
-  console.log(users);
-  res.cookie('userId', id);
+  req.session.userId = id;
   res.redirect('/urls');
 });
 
