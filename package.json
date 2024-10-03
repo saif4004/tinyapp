@@ -19,7 +19,8 @@
   },
   "homepage": "https://github.com/saif4004/tinyapp#readme",
   "dependencies": {
-    "cookie-parser": "^1.4.6",
+    "bcryptjs": "^2.4.3",
+    "cookie-session": "^2.1.0",
     "ejs": "^3.1.10",
     "express": "^4.21.0"
   },
