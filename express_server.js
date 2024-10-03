@@ -1,6 +1,7 @@
 const express = require("express");
 const cookieSession = require('cookie-session')
 const bcrypt = require("bcryptjs");
+const getUserByEmail = require("./helpers");
 const app = express();
 const PORT = 8080;
 
@@ -22,16 +23,7 @@ const generateRandomString = function () {
   return randomStr;
 };
 
-const getUserByEmail = (email) =>  {
-  for (const userId in users) {
-    const user = users[userId];
-    if (user.email === email) {
-      return user;
-    }
-  }
-  return null;
 
-};
 const ulrsForUser = (id) => {
   const userUrls = {};
   for (const ulrId in urlDatabase) {
@@ -220,7 +212,7 @@ app.post("/register",(req,res) =>{
   if (!email || !password) {
     return res.status(400).send('you must provide an email and a password')
   }
-  let foundUser = getUserByEmail(email);
+  let foundUser = getUserByEmail(email,users);
 
   if (foundUser) {
     return res.status(400).send('email already exists');
