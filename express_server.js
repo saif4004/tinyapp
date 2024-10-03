@@ -76,7 +76,6 @@ app.get("/urls/new", (req, res) => {
   const user = users[userId];
   const templateVars = { urls: urlDatabase,
     user: user,
-    loginVal: loginVal,
    };
   res.render("urls_new",templateVars);
 });
@@ -130,18 +129,19 @@ app.post("/login", (req,res) =>{
     }
   }
   if (!foundUser) {
-    return res.status(400).send('the email you provided does not exist');
+    return res.status(403).send('the email you provided does not exist');
   }
   if (foundUser.password !== password) {
-    return res.status(400).send('the passwords dont match');
+    return res.status(403).send('the passwords dont match');
   }
+  const user = req.body;
   res.cookie('userId', foundUser.id);
   res.redirect('/urls');
 
 });
 app.post("/logout", (req,res) =>{
   res.clearCookie('userId');
-  res.redirect('/urls');
+  res.redirect('/login');
 });
 
 app.get("/register", (req,res) => {
@@ -167,15 +167,12 @@ app.post("/register",(req,res) =>{
     password: password
   }
   users[id] = newUser;
-  console.log(users);
-
   res.cookie('userId', id);
   res.redirect('/urls');
 });
 
 app.get('/login', (req,res) => {
   res.render('login');
-
 });
 
 
